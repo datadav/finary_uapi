@@ -1,9 +1,25 @@
 import csv
 import sys
+import pandas as pd
 
 
 # "isin_code", "description","quantity","price","currency"
 def import_stocks_generic_csv(filename: str):
+    stocks_df = pd.read_csv(filename).dropna(subset=["ISIN"])
+    stocks_df["isin_code"] = stocks_df["ISIN"]
+    stocks_df["currency"] = "USD"
+    stocks_df["description"] = ""
+    stocks_df["quantity"] = stocks_df["Shares"]
+    stocks_df["price"] = stocks_df["Cost (Per Share)"].apply(lambda row: float(row.replace("$", "")))
+    print(stocks_df[["description", "isin_code", "quantity", "price", "currency"]].to_dict(
+        orient="records"
+    ))
+    return stocks_df[["description", "isin_code", "quantity", "price", "currency"]].to_dict(
+        orient="records"
+    )
+
+
+def import_stocks_generic_csv_deprecated(filename: str):
     results = []
     with open(filename, newline="") as csvfile:
         sniffer = csv.Sniffer()

@@ -55,6 +55,7 @@ Usage:
     finary_uapi scpis search QUERY
     finary_uapi scpis
     finary_uapi watches search QUERY
+    finary_uapi import realt
     finary_uapi import crowdlending_csv FILENAME [-d] [-f]
     finary_uapi import cryptocom FILENAME [(--new=NAME | --edit=account_id | --add=account_id)]
     finary_uapi import nexo FILENAME [(--new=NAME | --edit=account_id | --add=account_id)]
@@ -99,6 +100,7 @@ from .user_holdings_accounts import (
 from .importers.crowdlending_generic_csv import import_crowdlending_generic_csv
 from .importers.cryptocom import import_cc_csv
 from .importers.nexo import import_nexo_csv
+from .importers.import_realt import get_realt_rentals_blockchain, get_realtportfolio_other_finary
 from .importers.crypto_generic_csv import import_crypto_generic_csv
 from .importers.stocks_generic_csv import import_stocks_generic_csv
 from .institutions import get_institutions
@@ -430,7 +432,31 @@ def main() -> int:  # pragma: nocover
             elif args["stocks_json"]:
                 with open(args["FILENAME"], "r") as input_file:
                     to_be_imported = json.loads(input_file.read())
-
+            elif args["realt"]:
+                realt_portfolio, realt_portfolio_value = get_realt_rentals_blockchain()
+                current_portfolio = get_realtportfolio_other_finary(session)
+                if current_portfolio:
+                    # print(current_portfolio)
+                    buying_value = current_portfolio["buying_value"]
+                    update_user_generic_asset(
+                        session,
+                        current_portfolio["id"],
+                        "RealT Portfolio",
+                        "other",
+                        1,
+                        buying_value,
+                        realt_portfolio_value,
+                    )
+                else:
+                    buying_value = realt_portfolio_value
+                    add_user_generic_asset(
+                        session,
+                        "RealT Portfolio",
+                        "other",
+                        1,
+                        buying_value,
+                        realt_portfolio_value,
+                    )
             if to_be_imported:
                 if args["cryptocom"] or args["nexo"] or args["crypto_csv"]:
                     if args["--new"]:

@@ -12,6 +12,7 @@ python = "^3.10"
 docopt = "^0.6.2"
 fuzzywuzzy = {version = "^0.18.0", extras = ["speedup"]}
 requests = "^2.32.3"
+pandas = "^2.2.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "24.10.0"
